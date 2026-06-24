@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+  <title>婚礼侦探 · 词汇与发现</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #DCF4A2;
+      font-family: 'Segoe UI', 'Noto Serif SC', 'KaiTi', '楷体', 'STKaiti', '华文楷体', '宋体', serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.2rem;
+    }
+    .app {
+      max-width: 780px;
+      width: 100%;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 2.2rem 1.5rem 2.2rem 1.5rem;
+      box-shadow: 0 25px 45px rgba(0,85,164,0.2);
+      overflow: hidden;
+      border: 1px solid rgba(0,85,164,0.2);
+    }
+    .tabs { display: flex; background: #eef7d3; border-bottom: 2px solid #b3d987; }
+    .tab {
+      flex: 1; padding: 0.8rem 0.3rem; text-align: center; font-weight: bold; font-size: 1rem;
+      color: #0055A4; cursor: pointer; background: #eef7d3; border-bottom: 3px solid transparent;
+    }
+    .tab.active { background: white; border-bottom: 3px solid #0055A4; color: #003d73; }
+    .tab-content { display: none; padding: 1.2rem 1.5rem; }
+    .tab-content.active { display: block; }
+    .primary-btn {
+      background: #0055A4; border: none; color: white; font-weight: bold; font-size: 1.1rem;
+      padding: 0.6rem 1.8rem; border-radius: 2rem; cursor: pointer; transition: 0.2s;
+      box-shadow: 0 6px 12px rgba(0,85,164,0.25);
+    }
+    .primary-btn:hover { background: #003d73; }
+    .search-area { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .search-area input, .search-area select {
+      padding: 0.6rem 1rem; border: 2px solid #b3d987; border-radius: 2rem; font-size: 1rem; background: white;
+    }
+    .search-area input { flex: 2; min-width: 180px; }
+    .word-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    .word-table th { background: #0055A4; color: white; padding: 0.7rem 0.3rem; text-align: center; }
+    .word-table td { padding: 0.5rem 0.3rem; border-bottom: 1px solid #d0e3a5; text-align: center; }
+    .word-table tr:hover { background: #f0f9d8; }
+    .category-badge { background: #b3d987; border-radius: 1rem; padding: 0.2rem 0.7rem; font-size: 0.8rem; color: #003d73; }
+    .stats { display: flex; justify-content: space-between; align-items: center; background: #e5f0c9; border-radius: 2rem; padding: 0.4rem 1.3rem; margin-bottom: 1.2rem; font-weight: bold; color: #003d73; }
+    .hearts { font-size: 1.6rem; letter-spacing: 3px; }
+    .progress { background: #0055A4; border-radius: 1rem; padding: 0.3rem 1rem; color: white; }
+    .scene {
+      background: #f9fbe7; border-radius: 1.8rem 0.5rem 1.8rem 0.5rem; padding: 1.5rem 1.2rem; margin-bottom: 1.2rem;
+      box-shadow: inset 0 2px 8px rgba(0,85,164,0.1); border-left: 4px solid #0055A4; font-size: 1.2rem;
+      line-height: 1.7; color: #1a3b5c; text-align: center; word-break: break-word;
+    }
+    .scene .blank { display: inline-block; min-width: 4rem; border-bottom: 2px dashed #0055A4; font-weight: bold; color: #003d73; margin: 0 0.2rem; padding: 0 0.2rem; }
+    .choices { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; margin: 0.8rem 0; }
+    .choice-btn {
+      background: #f0f9d8; border: 2px solid #b3d987; color: #003d73; padding: 0.7rem 1.4rem; border-radius: 2.5rem;
+      font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center;
+    }
+    .choice-btn .pinyin { font-size: 0.75rem; color: #0055A4; opacity: 0.8; }
+    .choice-btn.selected { background: #cbe4a4; border-color: #0055A4; transform: scale(1.02); box-shadow: 0 4px 10px rgba(0,85,164,0.2); }
+    .action-buttons { display: flex; gap: 0.7rem; justify-content: center; margin: 0.8rem 0; flex-wrap: wrap; }
+    .action-btn { background: white; border: 2px solid #b3d987; color: #0055A4; border-radius: 2rem; padding: 0.4rem 1.2rem; font-weight: bold; cursor: pointer; }
+    .submit-btn { background: #0055A4; border: none; color: white; font-weight: bold; font-size: 1.2rem; padding: 0.7rem 2.5rem; border-radius: 2.5rem; cursor: pointer; margin: 0.8rem auto; display: block; }
+    .info-panel { background: #f4fbe0; border-radius: 1.5rem; padding: 1rem; margin: 0.8rem 0; color: #1a3b5c; font-size: 0.95rem; border: 1px dashed #b3d987; min-height: 2rem; }
+    .restart-btn { background: transparent; border: 2px solid #0055A4; color: #0055A4; padding: 0.5rem 2rem; border-radius: 2rem; font-weight: bold; cursor: pointer; margin: 1rem auto; display: block; }
+    .win-screen { text-align: center; font-size: 1.5rem; color: #003d73; background: #e5f0c9; border-radius: 3rem; padding: 2rem; }
+    .hidden { display: none !important; }
+    .theory-box { background: #f9fbe7; border-radius: 1.5rem; padding: 1.2rem; margin-bottom: 1.5rem; border-left: 5px solid #0055A4; }
+    .theory-box h3 { color: #0055A4; }
+    .theory-box p { margin: 0.4rem 0; color: #1a3b5c; }
+    .exercise-item { background: white; border-radius: 1.5rem; padding: 1rem; margin: 1rem 0; border: 1px solid #d0e3a5; }
+    .exercise-sentence { font-size: 1.2rem; margin-bottom: 0.5rem; text-align: center; }
+    .exercise-choices { display: flex; gap: 0.5rem; justify-content: center; }
+    .exercise-feedback { text-align: center; font-weight: bold; margin-top: 0.3rem; min-height: 1.5rem; }
+    .score-panel { text-align: center; margin: 1rem 0; font-weight: bold; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="tabs">
+    <div class="tab active" data-tab="dictionary">📚 词汇词典</div>
+    <div class="tab" data-tab="detective">🕵️ 婚礼侦探</div>
+    <div class="tab" data-tab="verbs">🧠 发现·出现·发生</div>
+  </div>
+
+  <div id="dictionary" class="tab-content active">
+    <div class="search-area">
+      <input type="text" id="searchInput" placeholder="搜索汉字/拼音/翻译...">
+      <select id="categoryFilter">
+        <option value="all">全部类别</option>
+        <option value="动词">动词</option>
+        <option value="名词">名词</option>
+        <option value="形容词/副词">形容词/副词</option>
+        <option value="连词/助词">连词/助词</option>
+        <option value="量词/短语">量词/短语</option>
+        <option value="补充">补充词汇</option>
+      </select>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="word-table" id="wordTable">
+        <thead><tr><th>汉字</th><th>拼音</th><th>翻译</th><th>类别</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="detective" class="tab-content">
+    <div id="gamePlayArea">
+      <div class="stats">
+        <div class="hearts" id="heartsDisplay">❤️❤️❤️❤️❤️</div>
+        <div class="progress" id="progressText">第 1 / 60 关</div>
+      </div>
+      <div class="scene" id="sceneText"></div>
+      <div class="choices" id="choicesContainer"></div>
+      <div class="action-buttons">
+        <button class="action-btn" id="translateBtn">🌐 翻译句子</button>
+        <button class="action-btn" id="hintBtn">💡 提示</button>
+      </div>
+      <div class="info-panel" id="infoPanel"></div>
+      <button class="submit-btn" id="submitAction">提交答案</button>
+      <div class="message" id="messageBox"></div>
+    </div>
+    <div id="winArea" class="win-screen hidden">
+      <div style="font-size:2.8rem;">🎉💒</div>
+      <p>幸亏你找到了我！<br>我们结婚吧！</p>
+      <button class="restart-btn" onclick="location.reload()">🔁 再玩一次</button>
+    </div>
+    <div id="loseArea" class="win-screen hidden">
+      <div style="font-size:2.8rem;">💔</div>
+      <p>机会错过了…<br>你失去了她。</p>
+      <button class="restart-btn" onclick="location.reload()">🔄 重新开始</button>
+    </div>
+  </div>
+
+  <div id="verbs" class="tab-content">
+    <div class="theory-box">
+      <h3>🔍 三个容易混淆的动词</h3>
+      <p><strong>发现</strong> (fāxiàn) – обнаружить, найти, выявить (в результате исследования, поиска)</p>
+      <p><strong>出现</strong> (chūxiàn) – появиться, возникнуть (часто внезапно, случайно, без явных причин)</p>
+      <p><strong>发生</strong> (fāshēng) – произойти, случиться (имеет место быть, обычно с причинами и последствиями)</p>
+    </div>
+    <div id="verbExercises"></div>
+    <div class="score-panel" id="verbScore"></div>
+    <button class="primary-btn" id="resetVerbs" style="display:block; margin:0 auto;">🔄 重新练习</button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const vocabulary = [
+      { char: '结婚', pinyin: 'jiéhūn', translation: 'жениться, вступить в брак', category: '动词' },
+      { char: '错过', pinyin: 'cuòguò', translation: 'упустить, пропустить', category: '动词' },
+      { char: '要不然', pinyin: 'yàoburán', translation: 'а то, иначе', category: '连词/助词' },
+      { char: '幸亏', pinyin: 'xìngkuī', translation: 'к счастью', category: '连词/助词' },
+      { char: '发现', pinyin: 'fāxiàn', translation: 'обнаруживать', category: '动词' },
+      { char: '出现', pinyin: 'chūxiàn', translation: 'возникнуть, появиться', category: '动词' },
+      { char: '发生', pinyin: 'fāshēng', translation: 'происходить', category: '动词' },
+      { char: '完全', pinyin: 'wánquán', translation: 'полный, целый', category: '形容词/副词' },
+      { char: '约好', pinyin: 'yuēhǎo', translation: 'договориться', category: '动词' },
+      { char: '约会', pinyin: 'yuēhuì', translation: 'свидание, встреча', category: '动词' },
+      { char: '原因', pinyin: 'yuányīn', translation: 'причина', category: '名词' },
+      { char: '加', pinyin: 'jiā', translation: 'добавлять, прибавлять', category: '动词' },
+      { char: '举动', pinyin: 'jǔdòng', translation: 'действия, поведение', category: '名词' },
+      { char: '指的是', pinyin: 'zhǐdeshì', translation: 'подразумевать, иметь в виду', category: '量词/短语' },
+      { char: '一捏', pinyin: 'yīniē', translation: 'щепотка', category: '量词/短语' },
+      { char: '要求', pinyin: 'yāoqiú', translation: 'требовать, просить', category: '动词' },
+      { char: '粒', pinyin: 'lì', translation: 'зерно, крупинка (сч. слово)', category: '量词/短语' },
+      { char: '拒绝', pinyin: 'jùjué', translation: 'отвергать, отказывать', category: '动词' },
+      { char: '拉近', pinyin: 'lājìn', translation: 'притягивать, сближать', category: '动词' },
+      { char: '忽然', pinyin: 'hūrán', translation: 'вдруг, неожиданно', category: '形容词/副词' },
+      { char: '责任心', pinyin: 'zérènxīn', translation: 'чувство ответственности', category: '名词' },
+      { char: '责任', pinyin: 'zérèn', translation: 'ответственность, обязательство', category: '名词' },
+      { char: '肯定', pinyin: 'kěndìng', translation: 'несомненно, обязательно', category: '形容词/副词' },
+      { char: '已经', pinyin: 'yǐjīng', translation: 'уже', category: '形容词/副词' },
+      { char: '家乡', pinyin: 'jiāxiāng', translation: 'родной край, родина', category: '名词' },
+      { char: '经常', pinyin: 'jīngcháng', translation: 'часто, обычно', category: '形容词/副词' },
+      { char: '嘴', pinyin: 'zuǐ', translation: 'рот', category: '名词' },
+      { char: '游泳', pinyin: 'yóuyǒng', translation: 'плавать', category: '动词' },
+      { char: '海边', pinyin: 'hǎibiān', translation: 'берег моря, побережье', category: '名词' },
+      { char: '沉默', pinyin: 'chénmò', translation: 'молчать; молчание', category: '形容词/副词' },
+      { char: '好奇心', pinyin: 'hàoqíxīn', translation: 'любопытство', category: '名词' },
+      { char: '小姐', pinyin: 'xiǎojiě', translation: 'девушка, мисс', category: '名词' },
+      { char: '小声', pinyin: 'xiǎoshēng', translation: 'тихо, шепотком', category: '形容词/副词' },
+      { char: '放', pinyin: 'fàng', translation: 'класть, ставить', category: '动词' },
+      { char: '服务', pinyin: 'fúwù', translation: 'служить, обслуживать', category: '动词' },
+      { char: '脸', pinyin: 'liǎn', translation: 'лицо', category: '名词' },
+      { char: '社死', pinyin: 'shèsǐ', translation: 'социальная смерть, публичный позор', category: '名词' },
+      { char: '尴尬', pinyin: 'gān’gà', translation: 'неловкий, сконфуженный', category: '形容词/副词' },
+      { char: '希望', pinyin: 'xīwàng', translation: 'надеяться, желать', category: '动词' },
+      { char: '根本', pinyin: 'gēnběn', translation: 'в корне, полностью', category: '形容词/副词' },
+      { char: '反应', pinyin: 'fǎnyìng', translation: 'реакция, реагировать', category: '名词' },
+      { char: '晚会', pinyin: 'wǎnhuì', translation: 'вечеринка, вечер', category: '名词' },
+      { char: '认识', pinyin: 'rènshi', translation: 'знать, быть знакомым', category: '动词' },
+      { char: '年轻', pinyin: 'niánqīng', translation: 'молодой', category: '形容词/副词' },
+      { char: '追求', pinyin: 'zhuīqiú', translation: 'ухаживать, добиваться', category: '动词' },
+      { char: '却是', pinyin: 'quèshì', translation: 'тем не менее, всё же', category: '连词/助词' },
+      { char: '结束', pinyin: 'jiéshù', translation: 'закончить(ся)', category: '动词' },
+      { char: '开始', pinyin: 'kāishǐ', translation: 'начинать(ся)', category: '动词' },
+      { char: '吃惊', pinyin: 'chījīng', translation: 'напугаться, удивиться', category: '动词' },
+      { char: '礼貌', pinyin: 'lǐmào', translation: 'вежливость, этикет', category: '形容词/副词' },
+      { char: '条件', pinyin: 'tiáojiàn', translation: 'условие, обстоятельства', category: '名词' },
+      { char: '骗子', pinyin: 'piànzi', translation: 'мошенник, обманщик', category: '名词' },
+      { char: '吸引力', pinyin: 'xīyǐnlì', translation: 'привлекательность', category: '名词' },
+      { char: '不敢', pinyin: 'bùgǎn', translation: 'не осмеливаться', category: '动词' },
+      { char: '配合', pinyin: 'pèihé', translation: 'сотрудничать, сочетать', category: '动词' },
+      { char: '咸', pinyin: 'xián', translation: 'солёный', category: '形容词/副词' },
+      { char: '久', pinyin: 'jiǔ', translation: 'долгий, длительный', category: '形容词/副词' },
+      { char: '未', pinyin: 'wèi', translation: 'не (ещё не)', category: '连词/助词' },
+      { char: '消息', pinyin: 'xiāoxi', translation: 'новость, известие', category: '名词' },
+      { char: '声音', pinyin: 'shēngyīn', translation: 'звук, голос', category: '名词' },
+      { char: '给', pinyin: 'gěi', translation: 'давать', category: '补充' },
+      { char: '一点儿', pinyin: 'yīdiǎnr', translation: 'немного', category: '补充' },
+      { char: '告诉', pinyin: 'gàosu', translation: 'сказать, сообщить', category: '补充' },
+      { char: '地方', pinyin: 'dìfang', translation: 'место', category: '补充' },
+      { char: '睡觉', pinyin: 'shuìjiào', translation: 'спать', category: '补充' },
+      { char: '女士', pinyin: 'nǚshì', translation: 'дама, госпожа', category: '补充' },
+      { char: '朋友', pinyin: 'péngyou', translation: 'друг', category: '补充' },
+      { char: '大声', pinyin: 'dàshēng', translation: 'громко', category: '补充' },
+      { char: '拿', pinyin: 'ná', translation: 'брать, взять', category: '补充' },
+      { char: '眼睛', pinyin: 'yǎnjing', translation: 'глаза', category: '补充' },
+      { char: '聚会', pinyin: 'jùhuì', translation: 'вечеринка, встреча', category: '补充' },
+      { char: '知道', pinyin: 'zhīdào', translation: 'знать', category: '补充' },
+      { char: '看见', pinyin: 'kànjiàn', translation: 'увидеть', category: '补充' },
+      { char: '老', pinyin: 'lǎo', translation: 'старый', category: '补充' },
+      { char: '高', pinyin: 'gāo', translation: 'высокий', category: '补充' },
+      { char: '喜欢', pinyin: 'xǐhuan', translation: 'нравиться, любить', category: '补充' },
+      { char: '而且', pinyin: 'érqiě', translation: 'к тому же', category: '补充' },
+      { char: '完成', pinyin: 'wánchéng', translation: 'завершить', category: '补充' },
+      { char: '继续', pinyin: 'jìxù', translation: 'продолжать', category: '补充' },
+      { char: '高兴', pinyin: 'gāoxìng', translation: 'радостный', category: '补充' },
+      { char: '难过', pinyin: 'nánguò', translation: 'грустный', category: '补充' },
+      { char: '小偷', pinyin: 'xiǎotōu', translation: 'вор', category: '补充' },
+      { char: '坏人', pinyin: 'huàirén', translation: 'плохой человек', category: '补充' },
+      { char: '不想', pinyin: 'bù xiǎng', translation: 'не хотеть', category: '补充' },
+      { char: '不会', pinyin: 'bú huì', translation: 'не уметь', category: '补充' },
+      { char: '帮助', pinyin: 'bāngzhù', translation: 'помогать', category: '补充' },
+      { char: '打扰', pinyin: 'dǎrǎo', translation: 'беспокоить', category: '补充' },
+      { char: '甜', pinyin: 'tián', translation: 'сладкий', category: '补充' },
+      { char: '辣', pinyin: 'là', translation: 'острый', category: '补充' },
+      { char: '长', pinyin: 'cháng', translation: 'длинный', category: '补充' },
+      { char: '多', pinyin: 'duō', translation: 'много', category: '补充' },
+      { char: '不', pinyin: 'bù', translation: 'не', category: '补充' },
+      { char: '没', pinyin: 'méi', translation: 'нет, не', category: '补充' },
+      { char: '事情', pinyin: 'shìqing', translation: 'дело, вещь', category: '补充' },
+      { char: '音乐', pinyin: 'yīnyuè', translation: 'музыка', category: '补充' }
+    ];
+
+    const pinyinDict = {};
+    vocabulary.forEach(w => { pinyinDict[w.char] = w.pinyin; });
+
+    // Связная история на китайском (60 шагов)
+    const steps = [
+      { text: '6月22日，早上。你醒来看到消息：「想找到我，就别______机会！」', answer: '错过', choices: ['错过','发现','出现'], translation: '22 июня, утро. Ты просыпаешься и видишь сообщение: «Если хочешь меня найти, не упусти шанс!»', hint: '失去机会' },
+      { text: '你想起今天就是你们的婚礼！你们俩必须______。', answer: '结婚', choices: ['结婚','约会','认识'], translation: 'Ты вспоминаешь: сегодня ваша свадьба! Вы должны пожениться.', hint: '成为夫妻' },
+      { text: '你赶快穿衣服。妈妈喊：「快点，______要迟到了！」', answer: '要不然', choices: ['要不然','幸亏','已经'], translation: 'Ты быстро одеваешься. Мама кричит: «Поторопись, иначе опоздаешь!»', hint: '如果不这样' },
+      { text: '______你带了伞，不然就淋湿了。', answer: '幸亏', choices: ['幸亏','要不然','完全'], translation: 'Хорошо, что ты взял зонт, а то промок бы.', hint: '因为某件事避免了坏事' },
+      { text: '出门时，你在桌子上______了一张纸条：「去公交站」。', answer: '发现', choices: ['发现','出现','发生'], translation: 'Выходя, ты находишь на столе записку: «Иди на остановку».', hint: '找到以前不知道的东西' },
+      { text: '在公交站，一个穿风衣的奇怪男人从雾里______。', answer: '出现', choices: ['出现','发现','发生'], translation: 'На остановке из тумана появляется странный человек в плаще.', hint: '从没有到有' },
+      { text: '他说：「这里马上要______一件重要的事。跟我来。」', answer: '发生', choices: ['发生','出现','发现'], translation: 'Он говорит: «Здесь сейчас произойдёт кое-что важное. Следуй за мной».', hint: '事情发生' },
+      { text: '你跟着他，______迷路了。', answer: '完全', choices: ['完全','根本','肯定'], translation: 'Ты идёшь за ним и совсем теряешься.', hint: '百分之百' },
+      { text: '突然电话响了。是她！「我们不是______在咖啡馆见面吗？」', answer: '约好', choices: ['约好','约会','要求'], translation: 'Вдруг звонит телефон. Это она! «Мы же договорились встретиться в кафе!»', hint: '说好时间和地点' },
+      { text: '「今天不光是见面，是真正的______！」她笑着说。', answer: '约会', choices: ['约会','晚会','服务'], translation: '«Сегодня не просто встреча, а настоящее свидание!» – смеётся она.', hint: '和喜欢的人见面' },
+      { text: '你问：「这一切奇怪的______是什么？」', answer: '原因', choices: ['原因','条件','消息'], translation: 'Ты спрашиваешь: «Какая причина всего этого?»', hint: '为什么' },
+      { text: '她说：「我想让你______一点浪漫。」', answer: '加', choices: ['加','放','给'], translation: 'Она говорит: «Я хочу, чтобы ты добавил немного романтики».', hint: '放进去更多' },
+      { text: '「你刚才的______真可爱，像个小侦探。」', answer: '举动', choices: ['举动','反应','声音'], translation: '«Твои действия были милыми, как у детектива».', hint: '做的事情' },
+      { text: '「这枚戒指______我们的未来。」', answer: '指的是', choices: ['指的是','叫做','意思是'], translation: '«Это кольцо означает наше будущее».', hint: '表示意思' },
+      { text: '「拿______盐，撒在肩膀上，祝好运。」', answer: '一捏', choices: ['一捏','一粒','一点儿'], translation: '«Возьми щепотку соли и брось через плечо на удачу».', hint: '用手指拿的一点点' },
+      { text: '「我______你，一定要找到最后一条线索。」', answer: '要求', choices: ['要求','希望','告诉'], translation: '«Я требую, чтобы ты нашёл последнюю подсказку».', hint: '让别人必须做' },
+      { text: '你打开小盒子，里面只有一______米。', answer: '粒', choices: ['粒','个','些'], translation: 'Ты открываешь коробочку, там лишь одно зёрнышко риса.', hint: '很小的圆东西的量词' },
+      { text: '「不要______我的请求，打开它。」', answer: '拒绝', choices: ['拒绝','配合','拉近'], translation: '«Не отвергай мою просьбу, открой».', hint: '说“不要”' },
+      { text: '打开盒子，一股暖流______了你们的距离。', answer: '拉近', choices: ['拉近','拉远','关掉'], translation: 'Открыв, чувствуешь, как тепло сближает вас.', hint: '让关系更近' },
+      { text: '______下起了大雨，但你们继续走。', answer: '忽然', choices: ['忽然','经常','已经'], translation: 'Внезапно пошёл дождь, но вы идёте дальше.', hint: '很快地，没想到' },
+      { text: '「我一直相信你的______。」', answer: '责任心', choices: ['责任心','好奇心','吸引力'], translation: '«Я всегда верила в твою ответственность».', hint: '愿意做好自己的事' },
+      { text: '「这是我们共同的______，让今天完美。」', answer: '责任', choices: ['责任','条件','原因'], translation: '«Это наша общая обязанность – сделать день идеальным».', hint: '应该做的事' },
+      { text: '「我______能做到！」你大声回答。', answer: '肯定', choices: ['肯定','完全','已经'], translation: '«Я точно справлюсь!» – громко отвечаешь ты.', hint: '非常确定' },
+      { text: '「我们______通过了大部分考验。」', answer: '已经', choices: ['已经','经常','忽然'], translation: '«Мы уже прошли большую часть испытаний».', hint: '动作完成' },
+      { text: '「还记得我们的______吗？婚礼后去那里。」', answer: '家乡', choices: ['家乡','海边','地方'], translation: '«Помнишь наш родной край? Поедем туда после свадьбы».', hint: '长大的地方' },
+      { text: '「我______想起我们第一次见面的情景。」', answer: '经常', choices: ['经常','已经','忽然'], translation: '«Я часто вспоминаю нашу первую встречу».', hint: '很多次' },
+      { text: '她亲了你的______，笑了。', answer: '嘴', choices: ['嘴','脸','声音'], translation: 'Она целует тебя в губы и смеётся.', hint: '吃饭和说话的地方' },
+      { text: '「记得我们在海里一起______吗？」', answer: '游泳', choices: ['游泳','跑步','睡觉'], translation: '«Помнишь, как мы вместе плавали в море?»', hint: '在水里运动' },
+      { text: '「那天在______，你第一次说爱我。」', answer: '海边', choices: ['海边','家乡','晚会'], translation: '«В тот день на пляже ты впервые сказал, что любишь».', hint: '靠近大海的地方' },
+      { text: '你______了一会儿，回忆那个瞬间。', answer: '沉默', choices: ['沉默','尴尬','害羞'], translation: 'Ты замолкаешь, вспоминая тот момент.', hint: '不说话' },
+      { text: '「你的______总是那么强，什么都要弄明白。」', answer: '好奇心', choices: ['好奇心','责任心','吸引力'], translation: '«Твоё любопытство всегда такое сильное».', hint: '想知道很多事' },
+      { text: '一位______送来一束花，祝你们幸福。', answer: '小姐', choices: ['小姐','女士','朋友'], translation: 'Девушка дарит вам букет и желает счастья.', hint: '年轻女人' },
+      { text: '「______点，别让路人听见。」', answer: '小声', choices: ['小声','大声','声音'], translation: '«Тише, чтобы прохожие не услышали».', hint: '声音很低' },
+      { text: '「把花______在长椅上，然后拉着我的手。」', answer: '放', choices: ['放','加','拿'], translation: '«Положи цветы на скамейку и возьми меня за руку».', hint: '放在某个地方' },
+      { text: '「这家咖啡馆的______很好，我们进去吧。」', answer: '服务', choices: ['服务','条件','要求'], translation: '«Здесь хорошее обслуживание, зайдём».', hint: '为别人做事' },
+      { text: '你看着她的______，满是幸福。', answer: '脸', choices: ['脸','嘴','眼睛'], translation: 'Ты смотришь на её лицо, полное счастья.', hint: '头的前面' },
+      { text: '突然你绊了一下，差点摔倒——真是______！', answer: '社死', choices: ['社死','尴尬','吃惊'], translation: 'Вдруг ты спотыкаешься – вот это публичный позор!', hint: '非常丢脸' },
+      { text: '你觉得很______，她却大笑。', answer: '尴尬', choices: ['尴尬','社死','沉默'], translation: 'Тебе неловко, но она хохочет.', hint: '不舒服，不知道怎么办' },
+      { text: '「我______这个时刻永远不要结束。」', answer: '希望', choices: ['希望','要求','发现'], translation: '«Я надеюсь, этот момент никогда не кончится».', hint: '心里想一件事发生' },
+      { text: '「我______不想让这场梦醒来。」', answer: '根本', choices: ['根本','完全','肯定'], translation: '«Я совсем не хочу просыпаться».', hint: '完全（强调）' },
+      { text: '你的______是紧紧抱住她。', answer: '反应', choices: ['反应','举动','声音'], translation: 'Твоя реакция – крепко обнять её.', hint: '听到后的回答或动作' },
+      { text: '「晚上还有一个盛大的______等着我们！」', answer: '晚会', choices: ['晚会','约会','聚会'], translation: '«Вечером нас ждёт большой праздник!»', hint: '晚上的派对' },
+      { text: '你______了她的所有朋友，大家都来了。', answer: '认识', choices: ['认识','知道','看见'], translation: 'Ты знаком со всеми её друзьями, они пришли.', hint: '以前见过' },
+      { text: '「我爸妈看着很______，其实都五十多了。」', answer: '年轻', choices: ['年轻','老','高'], translation: '«Мои родители выглядят молодо, хотя им за пятьдесят».', hint: '岁数不大' },
+      { text: '「你______了我三年，我才答应。」', answer: '追求', choices: ['追求','喜欢','认识'], translation: '«Ты добивался меня три года, прежде чем я согласилась».', hint: '想办法让对方喜欢自己' },
+      { text: '「我以为你胆小，______你是个英雄。」', answer: '却是', choices: ['却是','还是','而且'], translation: '«Я думала, ты трус, а ты оказался героем».', hint: '但是，和想的不同' },
+      { text: '「让游戏______吧，但我们的故事才刚开始。」', answer: '结束', choices: ['结束','开始','完成'], translation: '«Пусть игра закончится, но наша история только начинается».', hint: '到了最后' },
+      { text: '「让我们一起______新的一章。」', answer: '开始', choices: ['开始','结束','继续'], translation: '«Давай вместе начнём новую главу».', hint: '从现在做起' },
+      { text: '看着她，你______得说不出话。', answer: '吃惊', choices: ['吃惊','高兴','难过'], translation: 'Глядя на неё, ты удивлён до немоты.', hint: '突然觉得意外' },
+      { text: '「谢谢你一直对我家人有______。」', answer: '礼貌', choices: ['礼貌','条件','举动'], translation: '«Спасибо, что всегда вежлив с моей семьёй».', hint: '对人的尊重' },
+      { text: '「我们拥有幸福的所有______。」', answer: '条件', choices: ['条件','要求','原因'], translation: '«У нас есть все условия для счастья».', hint: '情况' },
+      { text: '「别信谣言，那家伙是个______！」', answer: '骗子', choices: ['骗子','小偷','坏人'], translation: '«Не верь слухам, тот тип – обманщик!»', hint: '说谎骗人' },
+      { text: '「你对我的______一点都没减少。」', answer: '吸引力', choices: ['吸引力','好奇心','责任心'], translation: '«Твоя привлекательность для меня ничуть не уменьшилась».', hint: '让人喜欢的力量' },
+      { text: '「我______相信这一切是真的。」', answer: '不敢', choices: ['不敢','不想','不会'], translation: '«Я не смею поверить, что это правда».', hint: '害怕，没有勇气' },
+      { text: '「请______我跳完这支舞。」', answer: '配合', choices: ['配合','帮助','打扰'], translation: '«Пожалуйста, подыграй мне в этом танце».', hint: '一起努力' },
+      { text: '「汤有点______，但我还是喝了。」', answer: '咸', choices: ['咸','甜','辣'], translation: '«Суп солоноват, но я всё равно выпью».', hint: '盐放多了' },
+      { text: '「好______不见！你最近怎么样？」', answer: '久', choices: ['久','长','多'], translation: '«Давно не виделись! Как дела?» (встреча старого друга)', hint: '很长时间' },
+      { text: '「他尚______到场，我们稍等。」', answer: '未', choices: ['未','不','没'], translation: '«Он ещё не пришёл, подождём».', hint: '还没有' },
+      { text: '「我收到一条好______：我们中奖了！」', answer: '消息', choices: ['消息','声音','事情'], translation: '«Я получил хорошую новость: мы выиграли!»', hint: '新的信息' },
+      { text: '「你的______是我听过最美的旋律。」', answer: '声音', choices: ['声音','消息','音乐'], translation: '«Твой голос – самая красивая мелодия».', hint: '耳朵听到的' }
+    ];
+
+    const MAX_LIVES = 5;
+    let lives = MAX_LIVES, currentStep = 0, selectedChoice = null, gameActive = true;
+
+    const gamePlayArea = document.getElementById('gamePlayArea');
+    const winArea = document.getElementById('winArea');
+    const loseArea = document.getElementById('loseArea');
+    const sceneText = document.getElementById('sceneText');
+    const choicesContainer = document.getElementById('choicesContainer');
+    const infoPanel = document.getElementById('infoPanel');
+    const messageBox = document.getElementById('messageBox');
+    const heartsDisplay = document.getElementById('heartsDisplay');
+    const progressText = document.getElementById('progressText');
+    const submitBtn = document.getElementById('submitAction');
+    const translateBtn = document.getElementById('translateBtn');
+    const hintBtn = document.getElementById('hintBtn');
+
+    function updateUI() {
+      heartsDisplay.innerHTML = [...Array(MAX_LIVES)].map((_,i) => i < lives ? '❤️' : '🖤').join('');
+      progressText.textContent = `第 ${currentStep+1} / ${steps.length} 关`;
+    }
+
+    function renderStep() {
+      if (!gameActive) return;
+      if (currentStep >= steps.length) {
+        gamePlayArea.classList.add('hidden'); winArea.classList.remove('hidden'); return;
+      }
+      if (lives <= 0) {
+        gamePlayArea.classList.add('hidden'); loseArea.classList.remove('hidden'); return;
+      }
+      const step = steps[currentStep];
+      sceneText.innerHTML = step.text.replace(/______/g, '<span class="blank">______</span>');
+      choicesContainer.innerHTML = '';
+      selectedChoice = null;
+      const shuffled = [...step.choices].sort(() => Math.random() - 0.5);
+      shuffled.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerHTML = `${choice}<span class="pinyin">${pinyinDict[choice] || ''}</span>`;
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedChoice = choice;
+        });
+        choicesContainer.appendChild(btn);
+      });
+      infoPanel.textContent = ''; messageBox.textContent = '';
+      updateUI();
+    }
+
+    function checkAnswer() {
+      if (!gameActive) return;
+      const step = steps[currentStep];
+      if (!selectedChoice) { messageBox.textContent = '⚠️ 请选择一个答案。'; return; }
+      if (selectedChoice === step.answer) {
+        messageBox.textContent = '✅ 正确！';
+        currentStep++;
+        renderStep();
+      } else {
+        lives--; updateUI();
+        if (lives <= 0) { gamePlayArea.classList.add('hidden'); loseArea.classList.remove('hidden'); return; }
+        messageBox.textContent = `❌ 不对，剩余生命：${lives}`;
+        selectedChoice = null;
+        document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+      }
+    }
+
+    translateBtn.addEventListener('click', () => {
+      if (!gameActive || currentStep >= steps.length) return;
+      infoPanel.textContent = `🌐 ${steps[currentStep].translation}`;
+    });
+    hintBtn.addEventListener('click', () => {
+      if (!gameActive || currentStep >= steps.length) return;
+      infoPanel.textContent = `💡 ${steps[currentStep].hint}`;
+    });
+    submitBtn.addEventListener('click', checkAnswer);
+    document.addEventListener('keypress', e => { if (e.key==='Enter' && document.getElementById('detective').classList.contains('active')) checkAnswer(); });
+
+    renderStep();
+
+    // вкладки
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const target = this.dataset.tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(target).classList.add('active');
+      });
+    });
+
+    // словарь
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const wordTableBody = document.querySelector('#wordTable tbody');
+    function renderDictionary() {
+      const term = searchInput.value.trim().toLowerCase();
+      const cat = categoryFilter.value;
+      const filtered = vocabulary.filter(w => {
+        const m = term==='' || w.char.includes(term) || w.pinyin.toLowerCase().includes(term) || w.translation.toLowerCase().includes(term);
+        return m && (cat==='all' || w.category===cat);
+      });
+      wordTableBody.innerHTML = filtered.map(w => `<tr><td>${w.char}</td><td>${w.pinyin}</td><td>${w.translation}</td><td><span class="category-badge">${w.category}</span></td></tr>`).join('');
+    }
+    searchInput.addEventListener('input', renderDictionary);
+    categoryFilter.addEventListener('change', renderDictionary);
+    renderDictionary();
+
+    // упражнения на 发现/出现/发生 (с переводами для ключей)
+    const verbExercises = [
+      { sentence: '我______我的钥匙 (ключ) 在桌子上。', answer: '发现' },
+      { sentence: '外面______了一只小猫。', answer: '出现' },
+      { sentence: '这里______了交通事故 (ДТП)。', answer: '发生' },
+      { sentence: '科学家______了一种新的药。', answer: '发现' },
+      { sentence: '突然，天上______了一道彩虹 (радуга)。', answer: '出现' },
+      { sentence: '昨天学校______了一件大事。', answer: '发生' },
+      { sentence: '你______我的手机在哪儿了吗？', answer: '发现' },
+      { sentence: '他走着走着，眼前______了一条河。', answer: '出现' },
+      { sentence: '最近______了很多奇怪的事。', answer: '发生' },
+      { sentence: '我______了一个秘密 (секрет)。', answer: '发现' }
+    ];
+    const verbContainer = document.getElementById('verbExercises');
+    const verbScoreDiv = document.getElementById('verbScore');
+    let verbResults = new Array(verbExercises.length).fill(null);
+
+    function renderVerbExercises() {
+      verbContainer.innerHTML = verbExercises.map((ex, idx) => `
+        <div class="exercise-item">
+          <div class="exercise-sentence">${ex.sentence.replace(/______/g, '<span class="blank">______</span>')}</div>
+          <div class="exercise-choices" id="verbChoices${idx}"></div>
+          <div class="exercise-feedback" id="verbFeedback${idx}"></div>
+        </div>
+      `).join('');
+      verbExercises.forEach((ex, idx) => {
+        const choicesDiv = document.getElementById(`verbChoices${idx}`);
+        ['发现','出现','发生'].forEach(word => {
+          const btn = document.createElement('button');
+          btn.className = 'choice-btn'; btn.textContent = word;
+          btn.addEventListener('click', () => {
+            if (verbResults[idx] !== null) return;
+            const correct = word === ex.answer;
+            verbResults[idx] = correct;
+            const fb = document.getElementById(`verbFeedback${idx}`);
+            fb.textContent = correct ? '✅ 正确！' : `❌ 应该是“${ex.answer}”`;
+            fb.style.color = correct ? '#2d6a4f' : '#c44536';
+            choicesDiv.querySelectorAll('button').forEach(b => b.disabled = true);
+            updateVerbScore();
+          });
+          choicesDiv.appendChild(btn);
+        });
+      });
+      updateVerbScore();
+    }
+    function updateVerbScore() {
+      const answered = verbResults.filter(r => r !== null).length;
+      const correct = verbResults.filter(r => r === true).length;
+      verbScoreDiv.textContent = `你已经回答了 ${answered}/10 题，正确 ${correct} 题。`;
+    }
+    document.getElementById('resetVerbs').addEventListener('click', () => {
+      verbResults = new Array(verbExercises.length).fill(null);
+      renderVerbExercises();
+    });
+    renderVerbExercises();
+  })();
+</script>
+</body>
+</html>
